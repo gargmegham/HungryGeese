@@ -1,0 +1,86 @@
+{
+  "name": "hungry_geese",
+  "title": "Hungry Geese",
+  "description": "Similar to the classic snake game with multiple players",
+  "version": "1.0.0",
+  "agents": [1, 2, 3, 4, 5, 6, 7, 8],
+  "configuration": {
+    "episodeSteps": 200,
+    "actTimeout": 1,
+    "columns": {
+      "description": "Horizontal number of cells on the board.",
+      "type": "integer",
+      "default": 11,
+      "minimum": 3
+    },
+    "rows": {
+      "description": "Vertical number of cells on the board.",
+      "type": "integer",
+      "default": 7,
+      "minimum": 3
+    },
+    "hunger_rate": {
+      "description": "The number of steps before the goose shrinks a cell.",
+      "type": "integer",
+      "minimum": 1,
+      "default": 40
+    },
+    "min_food": {
+      "description": "The minimum amount of food present for all steps.",
+      "type": "integer",
+      "default": 2,
+      "minimum": 1
+    },
+    "max_length": {
+      "description": "The max length any goose can be. Total reward = (max length + 1) * steps survived + goose length.",
+      "type": "integer",
+      "default": 99
+    }
+  },
+  "reward": {
+    "description": "steps survived * (max goose length + 1) + current goose length.",
+    "type": "integer",
+    "default": 0,
+    "minimum": 0
+  },
+  "observation": {
+    "geese": {
+      "description": "List of geese in order by the agent index.",
+      "type": "array",
+      "default": [],
+      "shared": true,
+      "items": {
+        "description": "A goose represented by positions on the board.",
+        "type": "array",
+        "items": {
+          "description": "A position of a goose with the 0 position representing the head.",
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "food": {
+      "description": "Positions on the board where food is present.",
+      "type": "array",
+      "default": [],
+      "shared": true,
+      "items": {
+        "type": "integer",
+        "minimum": 0
+      }
+    },
+    "index": {
+      "description": "Index of the current agent's goose in the list of geese.",
+      "type": "integer",
+      "minimum": 0,
+      "defaults": [0, 1, 2, 3, 4, 5, 6, 7]
+    },
+    "remainingOverageTime": 60
+  },
+  "action": {
+    "description": "Direction to move the head of your players goose.",
+    "type": "string",
+    "enum": ["NORTH", "EAST", "SOUTH", "WEST"],
+    "default": "NORTH"
+  }
+}
