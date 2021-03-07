@@ -18,7 +18,9 @@ Approach Comparison:
 
 
 Result of 1 vs 1
-![alt text](https://github.com/Megham-Garg/HungryGeese/blob/master/1v1.jpg?raw=true)
+&nbsp;
+!1v1(https://github.com/Megham-Garg/HungryGeese/blob/master/1v1.jpg?raw=true)
 
 Result of 1 vs 3
-![alt text](https://github.com/Megham-Garg/HungryGeese/blob/master/1v3.jpg?raw=true)
+&nbsp;
+!1v3(https://github.com/Megham-Garg/HungryGeese/blob/master/1v3.jpg?raw=true)
