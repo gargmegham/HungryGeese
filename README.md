@@ -17,10 +17,10 @@ Approach Comparison:
 7. Crazy Goose Agent
 
 
-Result of 1 vs 1
-&nbsp;
-!1v1(https://github.com/Megham-Garg/HungryGeese/blob/master/1v1.jpg?raw=true)
-
 Result of 1 vs 3
-&nbsp;
-!1v3(https://github.com/Megham-Garg/HungryGeese/blob/master/1v3.jpg?raw=true)
+</br>
+![1v3](https://user-images.githubusercontent.com/33658001/110236332-2980f200-7f5b-11eb-88b0-004d77f8fe34.jpg)
+
+Result of 1 vs 1
+</br>
+![1v1](https://user-images.githubusercontent.com/33658001/110236334-2ab21f00-7f5b-11eb-9dfa-c803bbeb2155.jpg)
