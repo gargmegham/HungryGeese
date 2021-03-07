@@ -208,22 +208,20 @@ def black_hole(available_steps, danger_area, occupied, my_head):
         visited = {tuple(my_head):True}
         flag, val = dfs_hole((x,y), occupied, visited, tuple(my_head))
         if flag:
-            black_holes[(x,y)] = available_steps[(x, y)][0]
-        available_steps[(x, y)][1] += val
+            black_holes[(x,y)] = [available_steps[(x, y)][0], val]
 
     for x, y in danger_area.keys():
         visited = {tuple(my_head):True}
         flag, val = dfs_hole((x,y), occupied, visited, tuple(my_head))
         if flag:
             black_holes[(x,y)] = [danger_area[(x,y)][0], val]
-        danger_area[(x, y)][1] += val
 
-    return black_holes, available_steps, danger_area
+    return black_holes
 
 def my_move(food_location, available_steps, other_heads, my_head, last_direction, body_cells, danger_area, mask, other_tails):
     my_food = []
 
-    black_holes, available_steps, danger_area = black_hole(available_steps, danger_area, [*body_cells, *other_heads, *other_tails], my_head)
+    black_holes = black_hole(available_steps, danger_area, [*body_cells, *other_heads, *other_tails], my_head)
     print("black hole if i head towards : {}".format(black_holes))
 
     direction_traffic = {val[0]:val[1] for val in available_steps.values()}
@@ -266,7 +264,7 @@ def my_move(food_location, available_steps, other_heads, my_head, last_direction
     while len(min_heap):
         traffic = heappop(min_heap)
         direct = corresponding_direction[traffic]
-        if direct not in black_holes.values():
+        if direct not in [hole[0] for hole in black_holes.values()]:
             print("found favourable food towards {}".format(direct))
             return direct
 
@@ -275,8 +273,8 @@ def my_move(food_location, available_steps, other_heads, my_head, last_direction
     last_option1 = []
     for cell in available_steps.keys():
         if cell in black_holes.keys():
-            if len(last_option1) == 0 or last_option1[1] > available_steps[cell][1]:
-                last_option1 = available_steps[cell]
+            if len(last_option1) == 0 or last_option1[1]+last_option1[2] > available_steps[cell][1]+black_holes[cell][1]:
+                last_option1 = [*available_steps[cell], black_holes[cell][1]]
         else:
             if len(temp) == 0 or temp[1] > available_steps[cell][1]:
                 temp = available_steps[cell]
@@ -288,8 +286,8 @@ def my_move(food_location, available_steps, other_heads, my_head, last_direction
     last_option2 = []
     for cell in danger_area.keys():
         if cell in black_holes.keys():
-            if len(last_option2) == 0 or last_option2[1] > danger_area[cell][1]:
-                last_option2 = danger_area[cell]
+            if len(last_option2) == 0 or last_option2[1]+last_option2[2] > available_steps[cell][1]+black_holes[cell][1]:
+                last_option2 = [*danger_area[cell], black_holes[cell][1]]
         else:
             if len(temp) == 0 or temp[1] > danger_area[cell][1]:
                 temp = danger_area[cell]
@@ -341,7 +339,7 @@ def agent(obs_dict, config_dict):
             direct = 'EAST'
         elif((y+1 == my_Y) or (y==10 and my_Y==0)) and last_direction != 'EAST':
             direct = 'WEST'
-        if direct != '-':
+        if(direct!= '-' and direct!=last_direction):
             available_steps[(x,y)] = [direct,0]
 
     for food in observation.food:

@@ -1,10 +1,21 @@
+# %%writefile smart_reinforcement_learning.py
+# This is a lightweight ML agent trained by self-play.
+# After sharing this notebook,
+# we will add Hungry Geese environment in our HandyRL library.
+# https://github.com/DeNA/HandyRL
+# We hope you enjoy reinforcement learning!
+
+
 import pickle
 import bz2
 import base64
 import numpy as np
 import torch
 import torch.nn as nn
-import torch.nn.functional as f
+import torch.nn.functional as F
+
+
+# Neural Network for Hungry Geese
 
 class TorusConv2d(nn.Module):
     def __init__(self, input_dim, output_dim, kernel_size, bn):
@@ -81,6 +92,9 @@ state_dict = pickle.loads(bz2.decompress(base64.b64decode(PARAM)))
 model = GeeseNet()
 model.load_state_dict(state_dict)
 model.eval()
+
+
+# Main Function of Agent
 
 obses = []
 
