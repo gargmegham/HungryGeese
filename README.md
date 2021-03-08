@@ -19,8 +19,8 @@ Approach Comparison:
 
 Result of 1 vs 3
 </br>
-![1v3](https://user-images.githubusercontent.com/33658001/110236332-2980f200-7f5b-11eb-88b0-004d77f8fe34.jpg)
+![1v3](https://user-images.githubusercontent.com/33658001/110279136-97322a00-7ffe-11eb-8cab-a971f9cdc75c.png)
 
 Result of 1 vs 1
 </br>
-![1v1](https://user-images.githubusercontent.com/33658001/110236334-2ab21f00-7f5b-11eb-9dfa-c803bbeb2155.jpg)
+![1v1](https://user-images.githubusercontent.com/33658001/110279142-98635700-7ffe-11eb-985e-fdcb35b54291.png)
