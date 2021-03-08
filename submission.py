@@ -1,4 +1,3 @@
-%%writefile submission.py
 
 from kaggle_environments.envs.hungry_geese.hungry_geese import Observation, Configuration, Action, row_col
 from heapq import heapify, heappush, heappop
@@ -414,14 +413,17 @@ def agent(obs_dict, config_dict):
             if (x, y) in available_steps.keys():
                 # let's remove all cells that are not available from available steps
                 available_steps.pop((x,y))
-                if not len(available_steps) and not len(danger_area): #if steps is empty kill by NORTH direction
-                    print("kill")
-                    if player_head!=player_tail and (my_tail_X, my_tail_Y) in possible_positions:
-                        last_direction = get_direction((my_X, my_Y), (my_tail_X, my_tail_Y))
-                    else:
-                        last_direction = 'NORTH'
-                    last_direction_updated = True
-                    break
+            if (x, y) in danger_area.keys():
+                # let's remove all cells that are not available from danger steps
+                danger_area.pop((x,y))
+            if not len(available_steps) and not len(danger_area): #if steps is empty kill by NORTH direction
+                print("kill")
+                if player_head!=player_tail and (my_tail_X, my_tail_Y) in possible_positions:
+                    last_direction = get_direction((my_X, my_Y), (my_tail_X, my_tail_Y))
+                else:
+                    last_direction = 'NORTH'
+                last_direction_updated = True
+                break
         if last_direction_updated:
             break
         if i != player_index:
@@ -439,21 +441,6 @@ def agent(obs_dict, config_dict):
                     available_steps.pop((x, y)) #only safe moves
         if last_direction_updated:
             break
-
-    #calculate traffic around that direction
-    # occupied_cells_without_tails = [*other_heads, *body_cells, [my_X, my_Y]]
-    # print("occupied cells without tails are {}".format(occupied_cells_without_tails))
-    # for (x, y) in available_steps.keys():
-    #     possible = get_nearest_cells(x, y)
-    #     print(possible)
-    #     for poss in possible:
-    #         if list(poss) in occupied_cells_without_tails:
-    #             available_steps[(x,y)][1]+=1
-    # for (x, y) in danger_area.keys():
-    #     possible = get_nearest_cells(x, y)
-    #     for poss in possible:
-    #         if list(poss) in occupied_cells_without_tails:
-    #             danger_area[(x,y)][1]+=1
     
     print("body cells are {}".format(body_cells))
     print("available steps are {}".format(available_steps))
@@ -461,7 +448,6 @@ def agent(obs_dict, config_dict):
     print("other tails at {}".format(other_tails))
     print("danger area at {}".format(danger_area))
 
-    # the first step toward the nearest favourable food
     my_head = [my_X, my_Y]
     if not last_direction_updated:
             last_direction = my_move(food_location, available_steps, other_heads, my_head, last_direction, body_cells, danger_area, mask, other_tails)
