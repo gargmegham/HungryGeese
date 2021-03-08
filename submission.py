@@ -71,7 +71,6 @@ def bfs(start_x, start_y, mask, food_coords, flag=0):
 
 def straightforward_bfs(mask, last_direction, start_row, start_col, food_coords):
     my_action = bfs(start_row, start_col, mask, food_coords)
-    print(my_action)
 
     up_x = start_row + 1 if start_row != 6 else 0
     down_x = start_row - 1 if start_row != 0 else 6
@@ -178,7 +177,6 @@ def opposite_direct(a,b):
     return False
 
 def dfs_hole(cell, occupied, visited, parent):
-    print(cell, visited, parent)
     visited[cell] = True
     res = True
     val = 1
@@ -209,14 +207,14 @@ def black_hole(available_steps, danger_area, occupied, my_head):
         flag, val = dfs_hole((x,y), occupied, visited, tuple(my_head))
         if flag:
             black_holes[(x,y)] = available_steps[(x, y)][0]
-        available_steps[(x, y)][1] += val
+        available_steps[(x, y)][1] = val
 
     for x, y in danger_area.keys():
         visited = {tuple(my_head):True}
         flag, val = dfs_hole((x,y), occupied, visited, tuple(my_head))
         if flag:
             black_holes[(x,y)] = [danger_area[(x,y)][0], val]
-        danger_area[(x, y)][1] += val
+        danger_area[(x, y)][1] = val
 
     return black_holes, available_steps, danger_area
 
@@ -226,19 +224,44 @@ def my_move(food_location, available_steps, other_heads, my_head, last_direction
     black_holes, available_steps, danger_area = black_hole(available_steps, danger_area, [*body_cells, *other_heads, *other_tails], my_head)
     print("black hole if i head towards : {}".format(black_holes))
 
-    direction_traffic = {val[0]:val[1] for val in available_steps.values()}
+    # available room for me to move in that direction
+    direction_room = {val[0]:val[1] for val in available_steps.values()}
+    print("room directions {}".format(direction_room))
 
-    min_heap = []
+    max_heap = []
     corresponding_direction = {}
-    heapify(min_heap)
-    
+    heapify(max_heap)
+    dp_dist = {}
+    closestFood = {}
+
+    for head in [*other_heads, my_head]:
+        for food in food_location:
+            key = tuple((*head, *food))
+            if key not in dp_dist.keys():
+                dp_dist[key] = bfs(*head, mask, [food], 1)
+            distance = dp_dist[key]
+
+            if tuple(head) not in closestFood.keys():
+                closestFood[tuple(head)] = [[food], distance]
+            elif distance < closestFood[tuple(head)][1]:
+                closestFood[tuple(head)] = [[food], distance]
+            elif distance == closestFood[tuple(head)][1]:
+                closestFood[tuple(head)][0].append(food)
+
+    for x in closestFood.values():
+        for food in x[0]:
+            if food in closestFood[tuple(my_head)][0] and x[1] < closestFood[tuple(my_head)][1]:
+                closestFood[tuple(my_head)][0].remove(food)
+        
     for food in food_location:
-        my_distance = bfs(*my_head, mask, [food], 1)
+        key = tuple((*my_head, *food))
+        my_distance = dp_dist[key]
         flag = True #closest to me
         my_food.append(food) # probable food
         for head in other_heads:
-            distance = bfs(*head, mask, [food], 1)
-            print("comp at {} i'm at {} my distace is {} his distance is {}".format(head,my_head,my_distance,distance))
+            key = tuple((*head, *food))
+            distance = dp_dist[key]
+            print("comp at {} i'm at {} my distance is {} his distance is {}".format(head,my_head,my_distance,distance))
             if distance < my_distance:
                 # probability denied
                 my_food.remove(food)
@@ -250,22 +273,46 @@ def my_move(food_location, available_steps, other_heads, my_head, last_direction
         else:
             my_food.remove(food)
             direct = straightforward_bfs(mask, last_direction, *my_head, [food])
-            if direct in direction_traffic.keys():
-                heappush(min_heap, direction_traffic[direct])
-                corresponding_direction[direction_traffic[direct]] = direct
+            if direct in direction_room.keys():
+                heappush(max_heap, -1*direction_room[direct])
+                corresponding_direction[direction_room[direct]] = direct
 
-    print("my options {}".format(my_food))
+    if len(max_heap):
+        print("available max heap and directions {} {}".format(max_heap, corresponding_direction))
+    while len(max_heap):
+        room = -1*heappop(max_heap)
+        direct = corresponding_direction[room]
+        if direct not in black_holes.values():
+            print("found favourable food towards {}".format(direct))
+            return direct
+
+    if len(my_food):
+        print("my options {}".format(my_food))
     for food in my_food:
         direct = straightforward_bfs(mask, last_direction, *my_head, [food])
-        if direct in direction_traffic.keys():
-            heappush(min_heap, direction_traffic[direct])
-            corresponding_direction[direction_traffic[direct]] = direct
-    
-    print("available min heap and directions {} {}".format(min_heap, corresponding_direction))
-    print("traffic directions {}".format(direction_traffic))
-    while len(min_heap):
-        traffic = heappop(min_heap)
-        direct = corresponding_direction[traffic]
+        if direct in direction_room.keys():
+            heappush(max_heap, -1*direction_room[direct])
+            corresponding_direction[direction_room[direct]] = direct
+    if len(max_heap):
+        print("available max heap and directions {} {}".format(max_heap, corresponding_direction))
+    while len(max_heap):
+        room = -1*heappop(max_heap)
+        direct = corresponding_direction[room]
+        if direct not in black_holes.values():
+            print("found favourable food towards {}".format(direct))
+            return direct
+
+    if len(closestFood[tuple(my_head)][0]):
+        print("my other options {}".format(closestFood[tuple(my_head)][0]))
+    for food in closestFood[tuple(my_head)][0]:
+        direct = straightforward_bfs(mask, last_direction, *my_head, [food])
+        if direct in direction_room.keys():
+            heappush(max_heap, -1*direction_room[direct])
+            corresponding_direction[direction_room[direct]] = direct
+    print("available max heap and directions {} {}".format(max_heap, corresponding_direction))
+    while len(max_heap):
+        room = -1*heappop(max_heap)
+        direct = corresponding_direction[room]
         if direct not in black_holes.values():
             print("found favourable food towards {}".format(direct))
             return direct
@@ -275,33 +322,33 @@ def my_move(food_location, available_steps, other_heads, my_head, last_direction
     last_option1 = []
     for cell in available_steps.keys():
         if cell in black_holes.keys():
-            if len(last_option1) == 0 or last_option1[1] > available_steps[cell][1]:
+            if len(last_option1) == 0 or last_option1[1] < available_steps[cell][1]:
                 last_option1 = available_steps[cell]
         else:
-            if len(temp) == 0 or temp[1] > available_steps[cell][1]:
+            if len(temp) == 0 or temp[1] < available_steps[cell][1]:
                 temp = available_steps[cell]
     if len(temp):
-        print("moving towards {}".format(temp[0]))
+        print("moving towards temp 1 {}".format(temp[0]))
         return temp[0]
 
     temp = []
     last_option2 = []
     for cell in danger_area.keys():
         if cell in black_holes.keys():
-            if len(last_option2) == 0 or last_option2[1] > danger_area[cell][1]:
+            if len(last_option2) == 0 or last_option2[1] < danger_area[cell][1]:
                 last_option2 = danger_area[cell]
         else:
-            if len(temp) == 0 or temp[1] > danger_area[cell][1]:
+            if len(temp) == 0 or temp[1] < danger_area[cell][1]:
                 temp = danger_area[cell]
     if len(temp):
-        print("moving towards {}".format(temp[0]))
+        print("moving towards temp 2 {}".format(temp[0]))
         return temp[0]
     
     if len(last_option1):
-        print("moving towards black hole {}".format(last_option1[0]))
+        print("moving towards last option 1 {}".format(last_option1[0]))
         return last_option1[0]
     if len(last_option2):
-        print("moving towards black hole worse {}".format(last_option2[0]))
+        print("moving towards last option 2 {}".format(last_option2[0]))
         return last_option2[0]
 
 def agent(obs_dict, config_dict):
@@ -394,19 +441,19 @@ def agent(obs_dict, config_dict):
             break
 
     #calculate traffic around that direction
-    occupied_cells_without_tails = [*other_heads, *body_cells, [my_X, my_Y]]
-    print("occupied cells without tails are {}".format(occupied_cells_without_tails))
-    for (x, y) in available_steps.keys():
-        possible = get_nearest_cells(x, y)
-        print(possible)
-        for poss in possible:
-            if list(poss) in occupied_cells_without_tails:
-                available_steps[(x,y)][1]+=1
-    for (x, y) in danger_area.keys():
-        possible = get_nearest_cells(x, y)
-        for poss in possible:
-            if list(poss) in occupied_cells_without_tails:
-                danger_area[(x,y)][1]+=1
+    # occupied_cells_without_tails = [*other_heads, *body_cells, [my_X, my_Y]]
+    # print("occupied cells without tails are {}".format(occupied_cells_without_tails))
+    # for (x, y) in available_steps.keys():
+    #     possible = get_nearest_cells(x, y)
+    #     print(possible)
+    #     for poss in possible:
+    #         if list(poss) in occupied_cells_without_tails:
+    #             available_steps[(x,y)][1]+=1
+    # for (x, y) in danger_area.keys():
+    #     possible = get_nearest_cells(x, y)
+    #     for poss in possible:
+    #         if list(poss) in occupied_cells_without_tails:
+    #             danger_area[(x,y)][1]+=1
     
     print("body cells are {}".format(body_cells))
     print("available steps are {}".format(available_steps))
